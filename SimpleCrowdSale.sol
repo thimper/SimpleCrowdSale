@@ -88,7 +88,7 @@ contract SimpleCrowdSale is ERC20Token {
         returns (uint256 amount)
     {
         assert(funding);
-        uint256 tokenAmount = safeMul(msg.value, tokenContributionRate)/100000000;
+        uint256 tokenAmount = safeMul(msg.value, tokenContributionRate)/100000000; // the uint of msg.value is different with Ethereum
         assert(safeAdd(totalSupply, tokenAmount) <= tokenContributionCap);
         totalSupply = safeAdd(totalSupply, tokenAmount);
         balanceOf[msg.sender] = safeAdd(balanceOf[msg.sender], tokenAmount);
@@ -127,7 +127,7 @@ contract SimpleCrowdSale is ERC20Token {
         balanceOf[msg.sender] = 0;
         totalSupply = safeSub(totalSupply, tokenAmount);
 
-        uint256 refundValue = safeMul(tokenAmount, 100000000) / tokenContributionRate;
+        uint256 refundValue = safeMul(tokenAmount, 100000000) / tokenContributionRate; // the uint of msg.value is different with Ethereum
         Refund(msg.sender, refundValue);
         msg.sender.transfer(refundValue);
     }
