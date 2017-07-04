@@ -62,7 +62,7 @@ contract SimpleCrowdSale is ERC20Token {
         validAmount(_founderPercentOfTotal)
         validAmount(100 - founderPercentOfTotal)
     {
-        assert(now < _startTime);
+        assert(now <= _startTime);
         founder = msg.sender;
         startTime = _startTime;
         endTime = safeAdd(_startTime, _duration);
@@ -101,7 +101,7 @@ contract SimpleCrowdSale is ERC20Token {
         public
     {
         assert(funding);
-        assert(now >= startTime && totalSupply >= tokenContributionMin);
+        assert(now >= endTime && totalSupply >= tokenContributionMin);
 
         funding = false;
         uint256 additionalTokens =
