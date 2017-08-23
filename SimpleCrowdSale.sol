@@ -6,7 +6,6 @@ contract SimpleCrowdSale is ERC20Token {
 
     string public constant version = "0.1";
 
-    bool public transfersEnabled = false; // true if transfer/transferFrom are enabled, false if not
     bool public funding = true; // funding state
 
     uint256 public startTime = 0; //crowdsale start time (in seconds)
@@ -36,11 +35,6 @@ contract SimpleCrowdSale is ERC20Token {
 
     modifier validAmount(uint256 _amount) {
         require(_amount > 0);
-        _;
-    }
-
-    modifier transfersAllowed {
-        assert(transfersEnabled);
         _;
     }
 
@@ -87,12 +81,23 @@ contract SimpleCrowdSale is ERC20Token {
         validAmount(msg.value)
         returns (uint256 amount)
     {
-        assert(funding);
+        assert(totalSupply < tokenContributionCap);
+
         uint256 tokenAmount = safeMul(msg.value, tokenContributionRate)/100000000; // the uint of msg.value is different with Ethereum
-        assert(safeAdd(totalSupply, tokenAmount) <= tokenContributionCap);
+        uint back_qtum = 0;
+
+        if (safeAdd(totalSupply, tokenAmount) > tokenContributionCap) {
+            uint over = safeAdd(totalSupply, tokenAmount) - tokenContributionCap;
+            back_qtum = safeMul(over, 100000000)/tokenContributionRate;
+            tokenAmount = tokenContributionCap - totalSupply;
+        }
+
         totalSupply = safeAdd(totalSupply, tokenAmount);
         balanceOf[msg.sender] = safeAdd(balanceOf[msg.sender], tokenAmount);
         Contribution(msg.sender, msg.value, tokenAmount);
+        if (back_qtum > 0) {
+            msg.sender.transfer(back_qtum);
+        }
         return tokenAmount;
     }
 
@@ -105,15 +110,13 @@ contract SimpleCrowdSale is ERC20Token {
 
         funding = false;
         uint256 additionalTokens =
-            totalSupply * founderPercentOfTotal / (100 - founderPercentOfTotal);
+            safeMul(totalSupply, founderPercentOfTotal) / (100 - founderPercentOfTotal);
         totalSupply = safeAdd(totalSupply, additionalTokens);
         balanceOf[founder] = safeAdd(balanceOf[founder], additionalTokens);
         Transfer(0, founder, additionalTokens);
-        transfersEnabled = true;
         Finalized(now);
         founder.transfer(this.balance);
     }
-
 
     function refund()
         public
@@ -131,25 +134,4 @@ contract SimpleCrowdSale is ERC20Token {
         Refund(msg.sender, refundValue);
         msg.sender.transfer(refundValue);
     }
-
-
-    function transfer(address _to, uint256 _value)
-        public
-        transfersAllowed
-        returns (bool success)
-    {
-        assert(super.transfer(_to, _value));
-        return true;
-    }
-
-
-    function transferFrom(address _from, address _to, uint256 _value)
-        public
-        transfersAllowed
-        returns (bool success)
-    {
-        assert(super.transferFrom(_from, _to, _value));
-        return true;
-    }
-
 }
