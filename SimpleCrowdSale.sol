@@ -38,7 +38,7 @@ contract SimpleCrowdSale is ERC20Token {
         _;
     }
 
-    // 设定ICO的 开始时间、持续时间、汇率、最小目标、最大目标、代币名称、符号、小数位
+    // 设定ICO的 开始时间、持续时间、汇率、最小目标、最大目标、代币名称、符号
     function SimpleCrowdSale(uint256 _startTime,
                      uint256 _duration,
                      uint256 _tokenContributionMin,
@@ -46,9 +46,8 @@ contract SimpleCrowdSale is ERC20Token {
                      uint256 _tokenContributionRate,
                      uint8 _founderPercentOfTotal,
                      string _name,
-                     string _symbol,
-                     uint8 _decimals)
-        ERC20Token(_name, _symbol, _decimals)
+                     string _symbol)
+        ERC20Token(_name, _symbol, 8)
         validAmount(_tokenContributionRate)
         validAmount(_tokenContributionMin)
         validAmount(_tokenContributionCap)
