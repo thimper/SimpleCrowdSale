@@ -93,6 +93,7 @@ contract SimpleCrowdSale is ERC20Token {
 
         totalSupply = safeAdd(totalSupply, tokenAmount);
         balanceOf[msg.sender] = safeAdd(balanceOf[msg.sender], tokenAmount);
+        Transfer(0, msg.sender, tokenAmount);
         Contribution(msg.sender, msg.value, tokenAmount);
         if (back_qtum > 0) {
             msg.sender.transfer(back_qtum);
